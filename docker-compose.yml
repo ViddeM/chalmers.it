@@ -1,0 +1,152 @@
+# Gamma frontend: localhost:3000
+# Gamma backend: localhost:8081
+
+# Chalmers.it frontend: localhost:3001
+# Chalmers.it storybook: localhost:6006
+
+version: "3"
+networks:
+  gamma:
+  api:
+  groups:
+  router:
+
+services:
+
+  ########### ROUTER NETWORK ########### 
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dev.Dockerfile
+    image: mat_frontend:dev
+    depends_on:
+      - router
+    networks:
+      - api
+    ports:
+      - 3001:3000
+    volumes:
+      - ./frontend:/usr/src/app
+
+  frontend-storybook:
+    command: yarn storybook
+    build:
+      context: ./frontend
+      dockerfile: dev.Dockerfile
+    image: mat_frontend:dev
+    depends_on:
+      - router
+    networks:
+      - api
+    ports:
+      - 6006:9009
+    volumes:
+      - ./frontend:/usr/src/app
+
+  router:
+    build:
+      context: ./api/router
+      dockerfile: dev.Dockerfile
+    image: router:dev
+    depends_on:
+      - groups
+    networks:
+      - api
+      - gamma
+      - router
+    volumes:
+      - ./api/router:/usr/src/app
+
+  router-redis:
+    image: redis:5.0
+    networks:
+      - router
+
+  ########### GAMMA NETWORK ###########
+
+  gamma-frontend:
+    image: cthit/gamma-frontend:development
+    environment:
+      HTTP_PROXY: http://gamma-backend:8081
+    depends_on:
+      - gamma-backend
+    networks:
+      - gamma
+    ports:
+      - 3000:3000
+
+  gamma-backend:
+    image: cthit/gamma-backend
+    environment:
+      # Default admin user name = admin
+      # Default admin password  = password
+
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_HOST: gamma-db
+      DB_PORT: 5432
+      DB_NAME: postgres
+
+      REDIS_HOST: gamma-redis
+      REDIS_PASSWORD: ""
+      REDIS_PORT: 6379
+
+      GOTIFY_KEY: "123abc"
+      GOTIFY_URL: http://gamma-gotify:8080/mail
+
+      DEFAULT_CLIENT_NAME: demo
+      DEFAULT_CLIENT_ID: id
+      DEFAULT_CLIENT_SECRET: secret
+      DEFAULT_REDIRECT_URI: http://localhost:3001/auth/account/callback
+      DEFAULT_API_KEY: key
+
+      SERVER_PORT: 8081
+      SUCCESSFUL_LOGIN: http://localhost:3000
+      CORS_ALLOWED_ORIGIN: http://localhost:3000
+      BACKEND_URI: http://localhost:8081/api/
+      PRODUCTION: "false"
+      COOKIE_DOMAIN: localhost
+      IS_MOCKING_CLIENT: "true"
+    depends_on:
+      - gamma-redis
+      - gamma-db
+    networks:
+      - gamma
+    ports:
+      - 8081:8081
+
+  gamma-redis:
+    image: redis:5.0
+    networks:
+      - gamma
+
+  gamma-db:
+    image: postgres:10
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: password
+    networks:
+      - gamma
+
+  ########### GROUPS NETWORK ########### 
+
+  groups:
+    build:
+      context: ./api/services/groups
+      dockerfile: dev.Dockerfile
+    image: cthit-groups:dev
+    depends_on:
+      - groups-redis
+    networks:
+      - api
+      - gamma
+      - groups
+    volumes:
+      - ./api/services/groups:/usr/src/app
+
+  groups-redis:
+    image: redis:5.0
+    networks:
+      - groups
