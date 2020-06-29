@@ -28,6 +28,7 @@ services:
       - 3001:3000
     volumes:
       - ./frontend:/usr/src/app
+      - /usr/src/app/node_modules
 
   frontend-storybook:
     command: yarn storybook
@@ -43,6 +44,7 @@ services:
       - 6006:9009
     volumes:
       - ./frontend:/usr/src/app
+      - /usr/src/app/node_modules
 
   router:
     build:
@@ -57,6 +59,7 @@ services:
       - router
     volumes:
       - ./api/router:/usr/src/app
+      - /usr/src/app/node_modules
 
   router-redis:
     image: redis:5.0
@@ -145,6 +148,7 @@ services:
       - groups
     volumes:
       - ./api/services/groups:/usr/src/app
+      - /usr/src/app/node_modules
 
   groups-redis:
     image: redis:5.0
