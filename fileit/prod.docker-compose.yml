@@ -15,7 +15,7 @@ services:
     ports:
       - 5122:5000
     volumes:
-      - ./images:/usr/src/app/images
+      - ./files:/usr/src/app/files
 
   adminer:
     image: adminer

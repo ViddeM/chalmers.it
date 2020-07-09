@@ -17,18 +17,17 @@ db.bind(
 )
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = config.IMAGE_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = config.IMAGE_SIZE_CAP_BYTES
+app.config['UPLOAD_FOLDER'] = config.FILE_SAVE_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = config.FILE_SIZE_CAP_BYTES
 
-if not os.path.exists(config.IMAGE_FOLDER):
+if not os.path.exists(config.FILE_SAVE_FOLDER):
     raise (Exception('Directory not found: "%s"\n'
-                     'Create the directory or change "config.py"' % config.IMAGE_FOLDER))
+                     'Create the directory or change "config.py"' % config.FILE_SAVE_FOLDER))
 
 
-class Image(db.Entity):
-    _table_ = "imageittable"
-    imageid = PrimaryKey(uuid.UUID, auto=True)
-    imagelink = Required(str)
+class File(db.Entity):
+    fileid = PrimaryKey(uuid.UUID, auto=True)
+    filelink = Required(str)
     uploadtime = Optional(datetime)
 
 
@@ -59,18 +58,18 @@ def upload_file():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             with db_session:
-                image = Image(
-                    imagelink="somelink/link.png",
+                file = File(
+                    filelink="somelink/link.png",
                 )
-                id = image.imageid
-                image_directory = app.config['UPLOAD_FOLDER'] + "/" + str(id) + "/"
+                id = file.fileid
+                file_directory = app.config['UPLOAD_FOLDER'] + "/" + str(id) + "/"
 
-                if not os.path.exists(image_directory):
-                    os.makedirs(image_directory)
+                if not os.path.exists(file_directory):
+                    os.makedirs(file_directory)
 
-                image.imagelink = image_directory + file.filename
-                file.save(os.path.join(image_directory, file.filename))
-            return url_for('uploaded_file', imageid=image.imageid, filename=file.filename)
+                file.filelink = file_directory + file.filename
+                file.save(os.path.join(file_directory, file.filename))
+            return url_for('uploaded_file', imageid=file.fileid, filename=file.filename)
 
     return '''
     <!doctype html>
@@ -84,10 +83,10 @@ def upload_file():
     '''
 
 
-@app.route('/uploads/<imageid>/<filename>')
-def uploaded_file(imageid, filename):
-    image_directory = app.config['UPLOAD_FOLDER'] + "/" + imageid + "/"
-    return send_from_directory(image_directory, filename)
+@app.route('/uploads/<fileid>/<filename>')
+def uploaded_file(fileid, filename):
+    file_directory = app.config['UPLOAD_FOLDER'] + "/" + fileid + "/"
+    return send_from_directory(file_directory, filename)
 
 
 if __name__ == '__main__':
