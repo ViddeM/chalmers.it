@@ -1,0 +1,5 @@
+Flask==1.0.2
+numpy==1.15.4
+packaging==18.0
+pony==0.7.6
+psycopg2==2.7.5

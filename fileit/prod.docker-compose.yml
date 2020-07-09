@@ -1,0 +1,25 @@
+version: "2"
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+    volumes: 
+      - ./data:/var/lib/postgresql/data 
+  
+  app: 
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5122:5000
+    volumes:
+      - ./images:/usr/src/app/images
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8085:8080
+    
