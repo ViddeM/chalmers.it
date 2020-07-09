@@ -7,17 +7,19 @@ services:
       - 5431:5432
     environment:
       POSTGRES_PASSWORD: password
-      POSTGRES_USER: imageit
-      POSTGRES_DB: imageit
+      POSTGRES_USER: fileit
+      POSTGRES_DB: fileit
 
   adminer:
     image: adminer
     restart: always
     ports:
       - 8085:8080
-  app: 
-    build:
-      context: .
-      dockerfile: dev.Dockerfile
-    ports:
-      - 5000:5000
+
+
+#  app:
+#    build:
+#      context: .
+#      dockerfile: dev.Dockerfile
+#    ports:
+#      - 5000:5000
